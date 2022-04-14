@@ -1,11 +1,11 @@
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
-import Header from "./components/header/Header";
+import Dashboard from "./components/Dashboard/Dashboard";
 import Footer from "./components/footer/Footer";
+import Header from "./components/header/Header";
 import Home from "./components/home/Home";
-import Products from "./components/products/Products";
-import { Route, BrowserRouter, Routes } from "react-router-dom";
 import LoginPage from "./components/login/LoginPage";
-import Dashboard from "./components/Dashboard/Dashboard"
+import Products from "./components/products/Products";
 
 
 function App(slides) {
