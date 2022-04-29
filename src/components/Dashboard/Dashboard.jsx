@@ -1,88 +1,203 @@
-import { getOrders, authoriseUser } from "../../services/api";
+// import { getOrders, authoriseUser } from "../../services/api";
+// import { useAuth0 } from "@auth0/auth0-react";
+// import { domainName } from "../../config";
+// import { Table, Icon } from "semantic-ui-react";
+// import { useEffect, useState } from "react";
+// import AddProduct from "../products/AddProduct";
+// import DataTableForUsser from "../dataTable/DataTableForUsser";
+// import DataTable from "../dataTable/DataTable";
+
+// function Dashboard() {
+//   const { error, isAuthenticated, isLoading, user, getAccessTokenSilently } =
+//     useAuth0();
+//   const [orderList, setOrderList] = useState([]);
+
+//   async function orderShow() {
+//     try {
+//       const token = await getAccessTokenSilently();
+//       console.log(token);
+//       const data = await getOrders(user.sub, token);
+//       console.log("data",data);
+
+//       if (data && Array.isArray(data)) {
+//         if (data.length !== 0) setOrderList(data);
+//       } else if (data && data.status === 401) {
+//         const authorised = await authoriseUser(user, token);
+//       } else {
+//         console.log("hajox");
+//       }
+//     } catch (error) {
+//       console.log("hajox chi");
+//     }
+//   }
+//   useEffect(() => {
+//       console.log("use effect call");
+//       if(user) orderShow();
+//       console.log("user=",user)
+//       if (user) {
+//        console.log("userDomain",user[`${domainName}roles`])
+//      }
+   
+//   }, [user]);
+//   return (
+//     <div className="dashboard ui container">
+//       {user &&
+//       user[`${domainName}roles`] &&
+//       user[`${domainName}roles`].includes("admin") ? (
+//         <>
+//        <AddProduct setResponseInfo={setResponseInfo} />
+//        <Tabs
+//             uploadImg={uploadImg}
+//             pendingProducts={pendingProducts}
+//             allProducts={allProducts}
+//             changeStatus={changeStatus}
+//             setResponseInfo={setResponseInfo} 
+//           />T
+//         </>
+//       ) : (
+       
+//        <DataTableForUsser list={orderList} />
+//       )}
+//     </div>
+//   );
+// }
+// export default Dashboard;
+
+import {
+  getOrders,
+  authoriseUser,
+  getProducts,
+  getAllOrders,
+  changeOrderStatus,
+  imgUpdate,
+} from "../../services/api";
 import { useAuth0 } from "@auth0/auth0-react";
 import { domainName } from "../../config";
-import { Table, Icon } from "semantic-ui-react";
+import { Message } from "semantic-ui-react";
 import { useEffect, useState } from "react";
 import AddProduct from "../products/AddProduct";
+import Tabs from "../tabs/Tabs";
+import { ADMIN, UNPAID } from "../../services/constants";
+import DataTableForUsser from "../dataTable/DataTableForUsser"; 
+import "./dashboard.css";
 
 function Dashboard() {
-  const { error, isAuthenticated, isLoading, user, getAccessTokenSilently } =
+  const { user, getAccessTokenSilently } =
     useAuth0();
   const [orderList, setOrderList] = useState([]);
-  //   user && console.log(user[`${domainName}roles`]);
-
+  const [adminData, setAdminData] = useState({});
+  const [responseInfo, setResponseInfo] = useState("");
+console.log("user", user)
   async function orderShow() {
     try {
       const token = await getAccessTokenSilently();
-      console.log(token);
-      const data = await getOrders(user.sub, token);
-      console.log(data);
-
-      if (data && Array.isArray(data)) {
-        if (data.length !== 0) setOrderList(data);
-      } else if (data && data.status === 401) {
-        const authorised = await authoriseUser(user, token);
+      let data = null;
+ 
+      if (user && user[`${domainName}roles`].includes(ADMIN)) {
+        const dataResult = await Promise.all([
+          getProducts(),
+          getAllOrders(user.sub, token, UNPAID),
+        ]);
+  
+        if (dataResult && dataResult[1] && dataResult[1].status === 401) {
+          const authorised = await authoriseUser(user, token);
+        } else {
+          setAdminData((adminData) => ({
+            ...adminData,
+            allProducts: dataResult[0],
+            pendingProducts: dataResult[1],
+          }));
+          
+        }
       } else {
-        console.log("hajox");
+        data = await getOrders(user.sub, token);
+      
+        if (data && Array.isArray(data)) {
+          if (data.length !== 0) setOrderList(data);
+        } else if (data && data.status === 401) {
+          const authorised = await authoriseUser(user, token);
+        } else {
+          console.log("sxal");
+        }
       }
     } catch (error) {
-      console.log("hajox chi");
+      console.log("user not authorised");
     }
   }
+
   useEffect(() => {
-      console.log("use effect call");
-      if(user) orderShow();
-      console.log("user=",user)
-      if (user) {
-       console.log("userDomain",user[`${domainName}roles`])
-     }
-   
-  }, [user]);
+    if (user || responseInfo.length > 0) orderShow();
+  }, [user, responseInfo]);
+  const { pendingProducts, allProducts } = adminData;
+
+  async function changeStatus(status, order_id) {
+    try {
+      const token = await getAccessTokenSilently();
+      const changeResult = await changeOrderStatus(
+        user.sub,
+        token,
+        order_id,
+        status
+      );
+      orderShow();
+    } catch (error) {
+      console.log("sxal es arel");
+    }
+  }
+
+  async function uploadImg(file, productId) {
+    try {
+      const token = await getAccessTokenSilently();
+      const responseImg = await imgUpdate(productId, file, token, user.sub);
+
+      if (responseImg.httpStatus && responseImg.httpStatus === "OK") {
+        setResponseInfo(responseImg.message);
+      }
+    } catch (error) {
+      console.log("something went wrong", error);
+    }
+  }
+
+  function handleDismiss() {
+    setResponseInfo("");
+  }
+  console.log("adminData", adminData);
   return (
     <div className="dashboard ui container">
-      it's dashboard      
+      {responseInfo.length > 0 ? (
+        <Message success onDismiss={handleDismiss} content={responseInfo} />
+      ) : (
+        ""
+      )}
       {user &&
       user[`${domainName}roles`] &&
-      user[`${domainName}roles`].includes("admin") ? (
+      user[`${domainName}roles`].includes(ADMIN) ? (
         <>
-          <AddProduct />
-          <Table celled>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell>Name</Table.HeaderCell>
-                <Table.HeaderCell>Status</Table.HeaderCell>
-                <Table.HeaderCell>Notes</Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              <Table.Row>
-                <Table.Cell>Product1</Table.Cell>
-                <Table.Cell>Pending</Table.Cell>
-                <Table.Cell negative>Notes</Table.Cell>
-              </Table.Row>
-              <Table.Row positive>
-                <Table.Cell>Product2</Table.Cell>
-                <Table.Cell>
-                  <Icon name="checkmark" />
-                  Pending
-                </Table.Cell>
-                <Table.Cell>Notes</Table.Cell>
-              </Table.Row>
-              <Table.Row>
-                <Table.Cell>Product3</Table.Cell>
-                <Table.Cell>Unknown</Table.Cell>
-                <Table.Cell positive>
-                  <Icon name="close" />
-                  Remove
-                </Table.Cell>
-              </Table.Row>
-            </Table.Body>
-          </Table>
+          <AddProduct setResponseInfo={setResponseInfo} />
+          <Tabs
+            uploadImg={uploadImg}
+            pendingProducts={pendingProducts}
+            allProducts={allProducts}
+            changeStatus={changeStatus}
+            setResponseInfo={setResponseInfo} 
+          />
         </>
       ) : (
-       ""
+        <DataTableForUsser list={orderList} />
       )}
     </div>
   );
 }
 export default Dashboard;
+
+
+
+
+
+
+
+
+
+
+
+

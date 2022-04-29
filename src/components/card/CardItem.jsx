@@ -4,7 +4,8 @@ import BuyProduct from "../buyProduct/BuyProduct"
 import { useAuth0 } from "@auth0/auth0-react";
 import {Link} from "react-router-dom";
 
-function CardItem({ description, image, name, price,item }) {
+
+function CardItem({ description, image, name, price,item,setResponseInfo }) {
   const {isAuthenticated,user} =useAuth0();
   return (
     <Card centered>
@@ -12,20 +13,20 @@ function CardItem({ description, image, name, price,item }) {
       <Card.Content>
         <Card.Header>{name}</Card.Header>
         <Card.Meta>
-          <span className="date">Joined in 2015</span>
+          <span className="date"> </span>
         </Card.Meta>
         <Card.Description>{description}</Card.Description>
       </Card.Content>
       
       <Card.Content extra className="buy-info">
-        {price}
+      {price}
         {isAuthenticated ? (
-          <BuyProduct item = {item} productInfo={{description, image, name, price}} />
+          <BuyProduct item = {item} productInfo={{description, image, name, price}} setResponseInfo={setResponseInfo} />
           
-        ) : (
-          <Button as={Link} to="/login" color="green" inverted floated="right">
-            BUY
-          </Button>
+          ) : (
+            <Button as={Link} to="/login" color="green" inverted floated="right">
+              BUY
+            </Button>
         )}
         {/* <a>
               <Icon name='user' />

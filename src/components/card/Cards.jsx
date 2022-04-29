@@ -3,7 +3,9 @@ import { getData,getProducts } from "../../services/api";
 import CardItem from "./CardItem";
 import "./cards.css";
 
-const Cards = () => {
+
+
+const Cards = ({setResponseInfo}) => {
   const [result, setResult] = useState([]);
 
   useEffect(() => {
@@ -24,6 +26,7 @@ const Cards = () => {
             image={item.image}
             name={item.name}
             price={item.price}
+            setResponseInfo={setResponseInfo}
           />
         );
       })}

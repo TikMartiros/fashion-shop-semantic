@@ -6,7 +6,7 @@ import Header from "./components/header/Header";
 import Home from "./components/home/Home";
 import LoginPage from "./components/login/LoginPage";
 import Products from "./components/products/Products";
-
+import DataTable from "./components/dataTable/DataTable";
 
 function App(slides) {
   return (

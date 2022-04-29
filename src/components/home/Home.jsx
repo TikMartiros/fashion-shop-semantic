@@ -1,18 +1,30 @@
 import Cards from "../card/Cards";
+import Slide from "../slider/Slides.jsx";
+import slidesData from "../../services/slideData.js";
 import "../home/home.css";
-import Slides from "../slider/Slides";
-import { useAuth0 } from "@auth0/auth0-react";
+import { Table, Icon, Message } from "semantic-ui-react";
+import { useEffect, useState } from "react";
 
+function Home() {
+  const [responseInfo, setResponseInfo] = useState("");
 
-const Home = () => {
-    const {user, isAuthenticated} = useAuth0();
+  let countPageProduct = 4;
 
-    return (
-        <div className="home main">
-            <Slides />
-           <Cards />
-        </div>
-    );
+  function handleDismiss() {
+    setResponseInfo("");
+  }
+  return (
+    <div className="home ui container">
+       {responseInfo.length > 0 ? (
+        <Message success onDismiss={handleDismiss} content={responseInfo} />
+      ) : (
+        ""
+      )}
+      <Slide slides={slidesData()} />
+      <Cards pageDevider={countPageProduct}
+      setResponseInfo={setResponseInfo}
+      />
+    </div>
+  );
 }
-
 export default Home;

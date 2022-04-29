@@ -1,6 +1,6 @@
 .ui.cards > .card {
   display: flex;
-  background-color: white;
+  background-color: rgb(250, 250, 250);
   justify-content: center;
 }
 .ui.card {

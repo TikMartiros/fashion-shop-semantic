@@ -8,6 +8,8 @@
 	overflow: hidden;
     width: 100%;
 	flex-direction: row;
+	margin-left: 200px;
+	
 }
 
 
@@ -17,11 +19,14 @@ img {
 	right: 0;
 	bottom: 0;
 	background-size: cover;
+	
+
 }
 
 .slideImg{
-	width: 70%;
+	 width: 70%; 
 	position: relative;;
+
 }
 
 .slideImg img{
@@ -94,10 +99,12 @@ img {
 	}
   }
 
-  @media screen and (max-width: 320px) {
+  @media screen and (max-width: 250px) {
 	#slide{
 		height: 50px;
 	}
+ 
+	
   }
 
-
+  
